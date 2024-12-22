@@ -1,5 +1,6 @@
 import torch
 from tqdm import tqdm
+from sklearn.metrics import f1_score
 
 def evaluate_model(model, val_loader, criterion, device):
 	# Évaluer sur l'ensemble de validation
@@ -7,6 +8,8 @@ def evaluate_model(model, val_loader, criterion, device):
 	val_loss = 0.0
 	correct = 0
 	total = 0
+	all_preds = []
+	all_labels = []
 
 	with torch.no_grad():
 		# Utiliser tqdm pour la barre de progression
@@ -22,7 +25,17 @@ def evaluate_model(model, val_loader, criterion, device):
 			correct += (preds == labels).sum().item()
 			total += labels.size(0)
 
+			# Collecter les prédictions et les vraies étiquettes pour le F1 score
+			all_preds.extend(preds.cpu().numpy())
+			all_labels.extend(labels.cpu().numpy())
+
 			# Mettre à jour la barre de progression
 			progress_bar.set_postfix()
 
-	return correct / total
+	# Calculer la validation accuracy
+	val_accuracy = correct / total
+
+	# Calculer le F1 score
+	f1 = f1_score(all_labels, all_preds, average='weighted')  # Utilisation de la moyenne pondérée pour multi-classes
+
+	return val_loss, val_accuracy, f1
