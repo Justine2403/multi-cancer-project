@@ -8,6 +8,7 @@ from src.CNN import CNN
 from src.data_preprocessing import show_batch, preprocess
 from src.evaluation import evaluate_model
 from src.training import train_model
+from src.visualization import loss_function_graph
 
 MODEL_DIR = "../models/"
 RESULTS_PATH = "../results.json"
@@ -69,6 +70,7 @@ if __name__ == '__main__':
         if results[model_name]["train_complete"] and results[model_name]["validation_complete"]:
             print(f"\nModel {model_name} already trained.")
             print(f"Results: {results[model_name]}")
+            loss_function_graph(model_name)
             continue    # Passer au modèle suivant
         elif results[model_name]["train_complete"] and not results[model_name]["validation_complete"]:
             epochs = len(results[model_name]["epochs"])
@@ -84,6 +86,7 @@ if __name__ == '__main__':
                     results[model_name]['val_acc'].append(validation_acc)
                     results[model_name]['f1_score'].append(f1_score)
                     update_json(RESULTS_PATH, results)
+                    loss_function_graph(model_name)
                 else:
                     print(f"Model for epoch {epoch+1} not found for {model_name}. Skipping...")
             results[model_name]['validation_complete'] = True
@@ -126,5 +129,6 @@ if __name__ == '__main__':
         results[model_name]['train_complete'] = True
         results[model_name]['validation_complete'] = True
         update_json(RESULTS_PATH, results)
+        loss_function_graph(model_name)
 
         print(f"\nTraining complete for {model_name}. Results saved.")
