@@ -3,6 +3,8 @@ import json
 import torch
 from torch import nn
 from torchvision import models
+
+from src.CNN import CNN
 from src.data_preprocessing import show_batch, preprocess
 from src.evaluation import evaluate_model
 from src.training import train_model
@@ -11,15 +13,19 @@ MODEL_DIR = "../models/"
 RESULTS_PATH = "../results.json"
 os.makedirs(MODEL_DIR, exist_ok=True)
 
+NUM_CLASSES = 10  # À ajuster pour ton dataset
+
 MODELS = {
-    "resnet18": models.resnet18(pretrained=True)
+    "resnet18": models.resnet18(pretrained=True),
+    "CNN": CNN(NUM_CLASSES)
 }
 
-NUM_CLASSES = 10  # À ajuster pour ton dataset
 
 # Préparer les modèles
 for model_name, model in MODELS.items():
-    model.fc = nn.Linear(model.fc.in_features, NUM_CLASSES)
+    # Vérifie si le modèle est une instance d'un modèle prédéfini de torchvision
+    if isinstance(model, (models.ResNet, models.VGG)):
+        model.fc = nn.Linear(model.fc.in_features, NUM_CLASSES)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device {device}")
@@ -104,7 +110,9 @@ if __name__ == '__main__':
             # Mise à jour des résultats
             results[model_name]['epochs'].append(epoch + 1)
             results[model_name]['train_loss'].append(train_loss)
+            results[model_name]['val_loss'].append(validation_loss)
             results[model_name]['val_acc'].append(validation_acc)
+            results[model_name]['f1_score'].append(f1_score)
 
             if validation_acc > best_acc:
                 best_acc = validation_acc
