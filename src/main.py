@@ -16,12 +16,12 @@ RESULTS_PATH = "../results.json"
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 NUM_CLASSES = 10  # À ajuster pour ton dataset
-INPUT_SIZE = 1024  
-HIDDEN_SIZE = [128, 64]
+INPUT_SIZE = 224 * 224 * 3
+HIDDEN_SIZE = [512, 256, 128]
 
 MODELS = {
-    #"resnet18": models.resnet18(pretrained=True),
-    #"CNN": CNN(NUM_CLASSES),
+    "resnet18": models.resnet18(pretrained=True),
+    "CNN": CNN(NUM_CLASSES),
     "DNN": DNN(INPUT_SIZE, HIDDEN_SIZE, NUM_CLASSES)
     }
 
