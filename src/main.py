@@ -4,22 +4,26 @@ import torch
 from torch import nn
 from torchvision import models
 
-from src.CNN import CNN
-from src.data_preprocessing import show_batch, preprocess
-from src.evaluation import evaluate_model
-from src.training import train_model
-from src.visualization import loss_function_graph
+from CNN import CNN
+from DNN import DNN
+from data_preprocessing import show_batch, preprocess
+from evaluation import evaluate_model
+from training import train_model
+from visualization import loss_function_graph
 
 MODEL_DIR = "../models/"
 RESULTS_PATH = "../results.json"
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 NUM_CLASSES = 10  # À ajuster pour ton dataset
+INPUT_SIZE = 1024  
+HIDDEN_SIZE = [128, 64]
 
 MODELS = {
-    "resnet18": models.resnet18(pretrained=True),
-    "CNN": CNN(NUM_CLASSES)
-}
+    #"resnet18": models.resnet18(pretrained=True),
+    #"CNN": CNN(NUM_CLASSES),
+    "DNN": DNN(INPUT_SIZE, HIDDEN_SIZE, NUM_CLASSES)
+    }
 
 
 # Préparer les modèles
@@ -34,6 +38,7 @@ print(f"Using device {device}")
 def update_json(result_path, results):
     with open(result_path, 'w') as f:
         json.dump(results, f, indent=4)
+
 
 if __name__ == '__main__':
     dataset, train_loader, val_loader = preprocess()
