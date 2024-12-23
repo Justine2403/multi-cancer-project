@@ -3,12 +3,15 @@ import json
 import torch
 from torch import nn
 from torchvision import models
-
+import numpy as np
 from src.CNN import CNN
 from src.data_preprocessing import show_batch, preprocess
 from src.evaluation import evaluate_model
 from src.training import train_model
 from src.visualization import loss_function_graph
+from src.visualization import plot_confusion_matrix
+from src.visualization import plot_roc_curve
+
 
 MODEL_DIR = "../models/"
 RESULTS_PATH = "../results.json"
@@ -70,8 +73,48 @@ if __name__ == '__main__':
         if results[model_name]["train_complete"] and results[model_name]["validation_complete"]:
             print(f"\nModel {model_name} already trained.")
             print(f"Results: {results[model_name]}")
+
+            # Affichage des courbes de perte
             loss_function_graph(model_name)
-            continue    # Passer au modèle suivant
+
+            # Charger le modèle pour l'évaluation
+            epoch_model_path = os.path.join(model_dir, f"{model_name}_epoch_{len(results[model_name]['epochs'])}.pth")
+            if os.path.exists(epoch_model_path):
+                print(f"Loading model {model_name} from epoch {len(results[model_name]['epochs'])}...")
+
+                # Charger le modèle sur le CPU en utilisant weights_only=True
+                model.load_state_dict(torch.load(epoch_model_path, map_location=torch.device('cpu'), weights_only=True))
+
+                # Récupérer les vraies étiquettes et les prédictions du modèle
+                y_true = []  # Liste pour les vraies étiquettes
+                y_pred = []  # Liste pour les prédictions
+                y_pred_probs = []  # Liste pour les probabilités prédites
+
+                # Boucle pour obtenir les résultats pour chaque lot
+                model.eval()
+                with torch.no_grad():
+                    for inputs, labels in val_loader:
+                        inputs, labels = inputs.to(device), labels.to(device)
+                        outputs = model(inputs)
+                        probs = torch.softmax(outputs, dim=1)
+                        preds = torch.argmax(probs, dim=1)
+
+                        y_true.extend(labels.cpu().numpy())
+                        y_pred.extend(preds.cpu().numpy())
+                        y_pred_probs.extend(probs[:, 1].cpu().numpy())  # Supposons une classification binaire
+
+                # Afficher la matrice de confusion
+                plot_confusion_matrix(model_name, np.array(y_true), np.array(y_pred))
+
+                # Afficher la courbe ROC
+                #plot_roc_curve(model_name, np.array(y_true), np.array(y_pred_probs))
+            else:
+                print(f"Model for epoch {len(results[model_name]['epochs'])} not found for {model_name}. Skipping...")
+
+            continue  # Passer au modèle suivant
+
+
+
         elif results[model_name]["train_complete"] and not results[model_name]["validation_complete"]:
             epochs = len(results[model_name]["epochs"])
             for epoch in range(epochs):
