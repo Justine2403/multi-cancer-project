@@ -2,8 +2,7 @@ import os
 import cv2
 import numpy as np
 from torchvision import datasets, transforms
-from torch.utils.data import DataLoader, random_split
-from sklearn.model_selection import train_test_split
+from torch.utils.data import random_split
 from sklearn.svm import SVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report
@@ -31,7 +30,7 @@ def load_data_with_lbp(dataset):
     features = []
     labels = []
     for img, label in dataset:
-        # Convertir le tensor en image numpy
+        # Convert tensor into numpy image
         img_np = np.array(img.permute(1, 2, 0) * 255, dtype=np.uint8)
         lbp_features = extract_lbp_features(img_np)
         features.append(lbp_features)

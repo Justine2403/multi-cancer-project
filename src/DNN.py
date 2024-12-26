@@ -1,7 +1,4 @@
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
-
 
 class DNN(nn.Module):
     def __init__(self, input_size, hidden_layers, num_classes):

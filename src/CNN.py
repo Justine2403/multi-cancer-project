@@ -2,11 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# remplacer la ligne model du main.py par
-# model = CNN(num_classes=len(dataset.classes))
-# et enlever la ligne suivante :
-# model.fc = nn.Linear(model.fc.in_features, len(dataset.classes))
-
 class CNN(nn.Module):
     def __init__(self, num_classes):
         super(CNN, self).__init__()
